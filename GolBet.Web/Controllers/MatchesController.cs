@@ -3,6 +3,8 @@ using GolBet.Services.DTOs;
 using GolBet.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
+using GolBet.Repositories.Data;
 
 namespace GolBet.Web.Controllers;
 
@@ -40,7 +42,6 @@ public class MatchesController : Controller
 
 
     // GET /Matches/Detail/3 
-
     public async Task<IActionResult> Detail(int id)
 
     {
@@ -56,21 +57,17 @@ public class MatchesController : Controller
     }
 
     // GET /Matches/Create 
-
+    [Authorize(Roles = DbSeeder.AdminRole)]
     public async Task<IActionResult> Create()
 
     {
-
         await LoadTeamsAsync();
-
         return View(new MatchFormDto());
-
     }
 
 
-
+    [Authorize(Roles = DbSeeder.AdminRole)]
     [HttpPost, ValidateAntiForgeryToken]
-
     public async Task<IActionResult> Create(MatchFormDto dto)
 
     {
@@ -84,8 +81,6 @@ public class MatchesController : Controller
             return View(dto);
 
         }
-
-
 
         try
 
@@ -110,17 +105,61 @@ public class MatchesController : Controller
             return View(dto);
 
         }
-
     }
 
 
+        // GET /Matches/Edit/5
+        [Authorize(Roles = DbSeeder.AdminRole)]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var dto = await _matchService.GetForEditAsync(id);
+            if (dto is null) return NotFound();
+
+            await LoadTeamsAsync(); // the form needs the dropdowns too
+            return View(dto);
+        }
+
+        // POST /Matches/Edit
+        [Authorize(Roles = DbSeeder.AdminRole)]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(MatchFormDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadTeamsAsync();
+                return View(dto);
+            }
+
+            try
+            {
+                await _matchService.UpdateAsync(dto);
+                TempData["Success"] = "Partido actualizado correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)      // business rule violated
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                await LoadTeamsAsync();
+                return View(dto);
+            }
+        }
+
+
+        // POST /Matches/Deactivate/5
+        [Authorize(Roles = DbSeeder.AdminRole)]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            await _matchService.DeactivateAsync(id);
+            TempData["Success"] = "Partido desactivado.";
+            return RedirectToAction(nameof(Index));
+        }
 
     // GET /Matches/Edit/5  y  POST /Matches/Edit  siguen el mismo molde 
 
     // (con GetForEditAsync y UpdateAsync); 
 
     // POST /Matches/Deactivate/5 es idéntico al de Teams. 
-
 
 
     private async Task LoadTeamsAsync()
