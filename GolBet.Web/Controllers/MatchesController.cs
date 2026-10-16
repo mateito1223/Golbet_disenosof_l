@@ -1,10 +1,11 @@
 ﻿using GolBet.Entities.Enums;
+using GolBet.Repositories.Data;
 using GolBet.Services.DTOs;
 using GolBet.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
-using GolBet.Repositories.Data;
+using System.IO.Pipelines;
 
 namespace GolBet.Web.Controllers;
 
@@ -22,33 +23,13 @@ public class MatchesController : Controller
         _teamService = teamService;
     }
 
-
-
-    // ANTES
-
-    // GET /Matches            -> all matches 
-    // GET /Matches?status=Scheduled -> filtered board 
-    //public async Task<IActionResult> Index(MatchStatus? status)
-    //{
-    //    ViewBag.CurrentStatus = status;
-    //    var board = await _matchService.GetBoardAsync(status);
-    //    return View(board);
-    //}
-
-    // DESPUÉS
-
-    // GET /Matches                                  -> all matches
-    // GET /Matches?status=Scheduled                 -> filtered by status
-    // GET /Matches?search=nacional                  -> filtered by team name
-    // GET /Matches?status=Scheduled&search=nacional -> both filters combined
-    public async Task<IActionResult> Index(MatchStatus? status, string? search)
+    public async Task<IActionResult> Index(MatchStatus? status, string? search) // El método ahora acepta un segundo dato: el texto que el usuario escribió.
     {
         ViewBag.CurrentStatus = status;
-        ViewBag.CurrentSearch = search;
-        var board = await _matchService.GetBoardAsync(status, search);
+        ViewBag.CurrentSearch = search;                                         // Guarda ese texto para que la vista pueda usarlo.
+        var board = await _matchService.GetBoardAsync(status, search);          // Le pasa el texto al servicio para que haga la búsqueda.
         return View(board);
     }
-
 
 
     // GET /Matches/Detail/3 

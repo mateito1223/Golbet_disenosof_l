@@ -35,7 +35,7 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
         if (!string.IsNullOrWhiteSpace(search))
 
         {
-            var term = search.Trim().ToLower();
+            var term = search.Trim().ToLower(); 
             query = query.Where(m => m.HomeTeam.Name.ToLower().Contains(term)    
                                   || m.AwayTeam.Name.ToLower().Contains(term));  // Buscamos en el nombre del equipo y el ToLower() funciona para 
                                                                                  // que la búsqueda ignore a mayúsculas y minúsculas

@@ -29,9 +29,8 @@
 </div>
 
 @{
-
     var current = (MatchStatus?)ViewBag.CurrentStatus;
-    var currentSearch = (string?)ViewBag.CurrentSearch;   @* NUEVO *@
+    var currentSearch = (string?)ViewBag.CurrentSearch;   @* NUEVO  el texto que el controller guardó para mostrarlo en la vista*@
 }
 
 <form method="get" asp-action="Index" class="d-flex gap-2 mb-3">
